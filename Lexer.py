@@ -1,6 +1,8 @@
+#importing re for creating regular expressions and importing pandas to create a dataframe for output
 import re
+import pandas as pd
 
-# Define token types
+# Defining token types
 TOK_TYP = {
     'DATATYPE':['int','float','bool','str','char','byte','list','tuple','dict'],# int a= | public int a= 
     'GLOBAL':['global','nonlocal','del'], # global i, del i,nonlocal i |global(i),del(i),nonlocal(i)
@@ -24,7 +26,7 @@ TOK_TYP = {
     'IDENTIFIER': r'[a-zA-Z_][a-zA-Z0-9_]*', 
     'INTEGER_LITERAL': r'\d+',
     'FLOAT_LITERAL': r'\d+\.\d+',
-    'STRING_LITERAL': r'\".*?\"|\'.*?\'',
+    'STRING_LITERAL': r'["\'].*?(?<!["\'])',
     'EXPONENT': ['^'],
     'ADD_SUB': ['+','-'],
     'MUL_DIV':['*','/','//','%'],
@@ -54,11 +56,16 @@ TOK_TYP = {
     'ESC_SEQ':['\n','\t']
 }
 
+# defining tokenizer function by taking input words(an array) from word splitter
 def tokenizer(words):
+    #initializing tokens list for storing tokens and line_no for keeping the track of line
     tokens=[]
     line_no = 1
-    print("Class Part Value Part Line Number")
+
+    #creating a loop to iterate over words array
     for i in range(len(words)):
+        
+        #checking every token word by word to fit it in a class
         if words[i] in TOK_TYP['DATATYPE']:
             tok=['DATATYPE',words[i],line_no]
             tokens.append(tok)
@@ -287,13 +294,13 @@ def tokenizer(words):
             #print(tokens,i)
             i=i+1
 
-        elif words[i][0]=='"':
+        elif words[i] in TOK_TYP['"']:
             tok=['"',words[i],line_no]
             tokens.append(tok)
             #print(tokens,i)
             i=i+1
 
-        elif words[i][0]=="'":
+        elif words[i] in TOK_TYP["'"]:
             tok=["'",words[i],line_no]
             tokens.append(tok)
             #print(tokens,i)
@@ -311,7 +318,7 @@ def tokenizer(words):
             #print(tokens,i)
             i=i+1
 
-        elif words[i] in TOK_TYP['COMMENT']:
+        elif words[i][0] in TOK_TYP['COMMENT']:
             tok=['COMMENT',words[i],line_no]
             tokens.append(tok)
             #print(tokens,i)
@@ -322,6 +329,23 @@ def tokenizer(words):
             tokens.append(tok)
             #print(tokens,i)
             i=i+1
+        
+        # Handle IDENTIFIER
+        elif re.match(TOK_TYP['IDENTIFIER'], words[i]):
+            tokens.append(['IDENTIFIER', words[i], line_no])
+
+        # Handle INTEGER_LITERAL
+        elif re.match(TOK_TYP['INTEGER_LITERAL'], words[i]):
+            tokens.append(['INTEGER_LITERAL', words[i], line_no])
+
+        # Handle FLOAT_LITERAL
+        elif re.match(TOK_TYP['FLOAT_LITERAL'], words[i]):
+            tokens.append(['FLOAT_LITERAL', words[i], line_no])
+
+        # Handle STRING_LITERAL
+        elif re.match(TOK_TYP['STRING_LITERAL'], words[i]):
+            tokens.append(['STRING_LITERAL', words[i], line_no])
+
             
         elif words[i] in TOK_TYP['ESC_SEQ']:
             if words[i]=='\n':
@@ -336,28 +360,36 @@ def tokenizer(words):
                 #print(tokens,i)
                 i=i+1
         else:
-            tok=['NORM',words[i],line_no]
+            tok=['INVALID',words[i],line_no]
             tokens.append(tok)
             #print(tokens,i)
             i=i+1
-
+    
     return tokens
 
+# defining word_splitter function by taking input words(an array) from word splitter
 def word_splitter(source_code):
+
+    #initializing words array to split words from source_code 
     words=[]
     
+    #defining punctuator,double operator, operator, escape sequence,comment and white space for word splitting
     punctuator=['...','_',',',';',':','!','$','?','(',')','[',']','.','{','}','"',"'"]
     double_op=['==','!=','<=','>=','+=','-=','*=','/=','%=','//']
     operator=['<','>','=','+','-','^','+','-','*','/','%']
     escape_seq=['\n','\t']
     comment=['#']
-    white_space=['    ','   ','  ',' ']
-    
+    white_space=[' ']
+
+    #defining lexem for storing the character of words,and  global i so it value doesn't change throughout the loop in conditional statements 
     global i
     i=0
     lexem=""
-    
+
+    #creating a loop so we can iterate through source code
     while(i<len(source_code)):
+        
+        #in source code identifying different separators
         if(source_code[i] in white_space):
             if(lexem==""):
                 i=i+1
@@ -483,7 +515,7 @@ def word_splitter(source_code):
             #print(i,words,"norm")
     return words
 
-    
+#example source code for our language
 source_code = """
 int run = 50
 if(run >= 50):
@@ -497,14 +529,19 @@ for i in range(67):
     print("hey")
 #bobsie the king
 """
+
+#calling word_spliiter and tokenizer functions and creating+printing the dataframe
 print(source_code)
 words=word_splitter(source_code)
 tokenizer=tokenizer(words)
-for token in tokenizer:
-    print(token)
+
+df=pd.DataFrame(tokenizer,columns=["Class Part","Value Part","Line No."])
+
+print(df)
 #print(words)
 ##for word in words:
 ##    print(word)
+
 
 exit()
 
