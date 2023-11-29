@@ -334,13 +334,13 @@ def tokenizer(words):
         elif re.match(TOK_TYP['IDENTIFIER'], words[i]):
             tokens.append(['IDENTIFIER', words[i], line_no])
 
-        # Handle INTEGER_LITERAL
-        elif re.match(TOK_TYP['INTEGER_LITERAL'], words[i]):
-            tokens.append(['INTEGER_LITERAL', words[i], line_no])
-
         # Handle FLOAT_LITERAL
         elif re.match(TOK_TYP['FLOAT_LITERAL'], words[i]):
             tokens.append(['FLOAT_LITERAL', words[i], line_no])
+
+        # Handle INTEGER_LITERAL
+        elif re.match(TOK_TYP['INTEGER_LITERAL'], words[i]):
+            tokens.append(['INTEGER_LITERAL', words[i], line_no])
 
         # Handle STRING_LITERAL
         elif re.match(TOK_TYP['STRING_LITERAL'], words[i]):
@@ -425,6 +425,21 @@ def word_splitter(source_code):
                     #print(i,words,"single_op")
                 
         elif (source_code[i] in punctuator) or (source_code[i] in escape_seq):
+            if source_code[i]=='.' and re.match(TOK_TYP['INTEGER_LITERAL'], source_code[i-1]) and re.match(TOK_TYP['INTEGER_LITERAL'], source_code[i+1]):
+                j=i+1
+                k=i-1
+                float_str=source_code[i]
+                while(re.match(TOK_TYP['INTEGER_LITERAL'], source_code[k])):
+                    float_str=source_code[k]+float_str
+                    k=k-1
+                print(float_str)
+                while(re.match(TOK_TYP['INTEGER_LITERAL'], source_code[j])):
+                    float_str=float_str+source_code[j]
+                    j=j+1
+                print(float_str)
+                i=j
+                words.append(float_str)
+                lexem=''
             if source_code[i]=='"': #0-9 while source_code[j]=='"': chk_str=source_code[j]+source_code[j+1] j=j+1
 
                 j=i+1
@@ -517,7 +532,7 @@ def word_splitter(source_code):
 
 #example source code for our language
 source_code = """
-int run = 50
+int run = 50.23
 if(run >= 50):
     print("King karlega, 'Bobsie the king' karlega!")
 else:
