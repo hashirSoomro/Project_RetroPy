@@ -23,7 +23,7 @@ TOK_TYP = {
     'ASYNC':['async'],# async def main():
     'AWAIT':['await'],# await asyncio.gather(count(), count(), count())
     'IMPORT':['import','from'],# import datetime | from datetime import time
-    'IDENTIFIER': r'[a-zA-Z_][a-zA-Z0-9_]*', 
+    'IDENTIFIER': r'[a-zA-Z_][a-zA-Z0-9_]*',
     'INTEGER_LITERAL': r'\d+',
     'FLOAT_LITERAL': r'\d+\.\d+',
     'STRING_LITERAL': r'["\'].*?(?<!["\'])',
@@ -374,7 +374,7 @@ def word_splitter(source_code):
     words=[]
     
     #defining punctuator,double operator, operator, escape sequence,comment and white space for word splitting
-    punctuator=['...','_',',',';',':','!','$','?','(',')','[',']','.','{','}','"',"'"]
+    punctuator=['...',',',';',':','!','$','?','(',')','[',']','.','{','}','"',"'"]
     double_op=['==','!=','<=','>=','+=','-=','*=','/=','%=','//']
     operator=['<','>','=','+','-','^','+','-','*','/','%']
     escape_seq=['\n','\t']
@@ -432,11 +432,11 @@ def word_splitter(source_code):
                 while(re.match(TOK_TYP['INTEGER_LITERAL'], source_code[k])):
                     float_str=source_code[k]+float_str
                     k=k-1
-                print(float_str)
+                #print(float_str)
                 while(re.match(TOK_TYP['INTEGER_LITERAL'], source_code[j])):
                     float_str=float_str+source_code[j]
                     j=j+1
-                print(float_str)
+                #print(float_str)
                 i=j
                 words.append(float_str)
                 lexem=''
@@ -527,35 +527,40 @@ def word_splitter(source_code):
         else:
             lexem+=source_code[i]
             i+=1
+            A_B_C =6
             #print(i,words,"norm")
     return words
 
 #example source code for our language
 source_code = """
-int run = 50.23
-if(run >= 50):
-    print("King karlega, 'Bobsie the king' karlega!")
-else:
-    print('"Naaaaa!"
-    ')
-while(a>6):
-    print("ye kia baat hui boss?")
-for i in range(67):
-    print("hey")
-#bobsie the king
+interface::A_B_C
+while(a.b.c<<<<<==78.65
+b+++=56.75ab7.11*/.56bcx.55.55.a5c
+char c="abc++=\\"abc\\\*/"abc"a=b=c
+string s='\\\'+'++'\n'+=35'\\
+return a&&==@bc
 """
-
+##int run = 50.23
+##if(run >= 50):
+##    print("King karlega, 'Bobsie the king' karlega!")
+##else:
+##    print('"Naaaaa!"
+##    ')
+##while(a>6):
+##    print("ye kia baat hui boss?")
+##for i in range(67):
+##    print("hey")
+###bobsie the king
 #calling word_spliiter and tokenizer functions and creating+printing the dataframe
 print(source_code)
 words=word_splitter(source_code)
 tokenizer=tokenizer(words)
-
+pd.set_option('display.max_rows', None)
 df=pd.DataFrame(tokenizer,columns=["Class Part","Value Part","Line No."])
 
 print(df)
-#print(words)
 ##for word in words:
-##    print(word)
+#   print(word)
 
 
 exit()
